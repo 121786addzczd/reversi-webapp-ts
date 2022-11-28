@@ -39,7 +39,7 @@ create table squares (
 );
 
 create table game_results (
-  idf int primary key auto_increment,
+  id int primary key auto_increment,
   game_id int not null,
   winner_disc int not null,
   end_at datetime not null,
