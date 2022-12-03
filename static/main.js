@@ -30,7 +30,6 @@ async function showBoard() {
         squareElement.appendChild(stoneElement)
       } else {
         squareElement.addEventListener('click', async () => {
-          console.log('clicked')
           const nextTurnCount = turnCount + 1
           await registerTurn(nextTurnCount, nextDisc, x, y)
         })
@@ -41,7 +40,7 @@ async function showBoard() {
   })
 }
 
-async function registerGames() {
+async function registerGame() {
   await fetch('/api/games', {
     method: 'POST'
   })
@@ -67,9 +66,8 @@ async function registerTurn(turnCount, disc, x, y) {
 }
 
 async function main() {
-  await registerGames()
+  await registerGame()
   await showBoard()
 }
-
 
 main()
