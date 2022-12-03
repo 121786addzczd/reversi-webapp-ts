@@ -4,68 +4,23 @@ import { TurnGateway } from '../dataaccess/turnGateway';
 import { MoveGateway } from '../dataaccess/moveGateway';
 import { SquareGateway } from '../dataaccess/squareGateway';
 import { connectMySQL } from '../dataaccess/connection';
-import { DARK, INITIAL_BOARD, LIGHT } from '../application/constants';
+import { TurnService } from '../application/turnService';
 
 export const turnRouter = express.Router()
+
+const turnService = new TurnService()
 
 const gameGateway = new GameGateway()
 const turnGateway = new TurnGateway()
 const moveGateway = new MoveGateway()
 const squareGateway = new SquareGateway()
 
-turnRouter.post('/api/games', async (req, res) => {
-  const now = new Date()
-
-  const conn = await connectMySQL()
-  try {
-    await conn.beginTransaction()
-
-    const gameRecord = await gameGateway.insert(conn, now)
-
-    const turnRecord = await turnGateway.insert(conn, gameRecord.id, 0, DARK, now)
-
-    await squareGateway.insertAll(conn, turnRecord.id, INITIAL_BOARD)
-
-    await conn.commit()
-  } finally {
-    await conn.end()
-  }
-  res.status(201).end()
-})
-
 turnRouter.get('/api/games/latest/turns/:turnCount', async (req, res) => {
   const turnCount = parseInt(req.params.turnCount)
 
-  const conn = await connectMySQL()
-  try {
-    const gameRecord = await gameGateway.findLatest(conn)
-    if (!gameRecord) {
-      throw new Error('Latest game not found')
-    }
+  const output = await turnService.findLatestGameTurnByTurnCount(turnCount)
 
-    const turnRecord = await turnGateway.findForGameIdAndTurnCount(conn, gameRecord.id, turnCount)
-
-    if (!turnRecord) {
-      throw new Error('Specifind turn not found')
-    }
-
-    const squareRecords = await squareGateway.findForTurnId(conn, turnRecord.id)
-    const board = Array.from(Array(8)).map(() => Array.from(Array(8)))
-    squareRecords.forEach((s) => {
-      board[s.y][s.x] = s.disc
-    })
-
-    const responseBody = {
-      turnCount,
-      board,
-      nextDisc: turnRecord.nextDisc,
-      // TODO 決着がついている場合、game_results テーブルから取得する
-      winnerDisc: null
-    }
-    res.json(responseBody)
-  } finally {
-    await conn.end()
-  }
+  res.json(output)
 })
 
 turnRouter.post('/api/games/latest/turns', async (req, res) => {
@@ -74,60 +29,7 @@ turnRouter.post('/api/games/latest/turns', async (req, res) => {
   const x = parseInt(req.body.move.x)
   const y = parseInt(req.body.move.y)
 
-  const conn = await connectMySQL()
-  try {
-    // 1つ前のターンを取得する
-    const gameRecord = await gameGateway.findLatest(conn)
-    if (!gameRecord) {
-      throw new Error('Latest game not found')
-    }
-
-    const previousTurnCount = turnCount - 1
-    const previousTurnRecord = await turnGateway.findForGameIdAndTurnCount(
-      conn,
-      gameRecord.id,
-      previousTurnCount
-    )
-
-    if (!previousTurnRecord) {
-      throw new Error('Specifind turn not found')
-    }
-
-    const squareRecords = await squareGateway.findForTurnId(conn, previousTurnRecord.id)
-
-    const board = Array.from(Array(8)).map(() => Array.from(Array(8)))
-    squareRecords.forEach((s) => {
-      board[s.y][s.x] = s.disc
-    })
-
-    // 盤面に置けるかチェックする
-
-    // 石を置く
-    board[y][x] = disc
-
-    // ひっくり返す
-
-    // ターンを保存する
-    const nextDisc = disc === DARK ? LIGHT : DARK
-    const now = new Date()
-    const turnRecord = await turnGateway.insert(
-      conn,
-      gameRecord.id,
-      turnCount,
-      nextDisc,
-      now
-    )
-
-    await squareGateway.insertAll(conn, turnRecord.id, board)
-
-    await moveGateway.insert(conn, turnRecord.id, disc, x, y)
-
-    await conn.commit()
-  } catch (e) {
-    console.log(`エラー発生 ${e}`);
-  } finally {
-    await conn.end()
-  }
+  await turnService.registerTurn(turnCount, disc, x, y)
 
   res.status(201).end()
 })
