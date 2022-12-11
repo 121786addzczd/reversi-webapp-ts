@@ -1,5 +1,5 @@
 export const Disc = {
-  Empty: 1,
+  Empty: 0,
   Dark: 1,
   Light: 2
 } as const

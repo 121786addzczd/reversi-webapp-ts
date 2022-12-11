@@ -1,5 +1,5 @@
 import { SymbolDisplayPartKind } from "typescript";
-import { Board } from "./board";
+import { Board, initialBoard } from "./board";
 import { Disc } from "./disc";
 import { Move } from "./move";
 import { Point } from "./point";
@@ -48,6 +48,10 @@ export class Turn {
     return this._nextDisc
   }
 
+  get move() {
+    return this._move
+  }
+
   get board() {
     return this._board
   }
@@ -55,5 +59,15 @@ export class Turn {
   get endAt() {
     return this._endAt
   }
+}
 
+export function firstTurn(gameId: number, endAt: Date): Turn {
+  return new Turn(
+    gameId,
+    0,
+    Disc.Dark,
+    undefined,
+    initialBoard,
+    endAt
+  )
 }
