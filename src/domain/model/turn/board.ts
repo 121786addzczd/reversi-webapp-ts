@@ -1,7 +1,7 @@
-import { DomainError } from "../../error/DomainError";
-import { Disc, isOppositeDisc } from "./disc";
-import { Move } from "./move";
-import { Point } from "./point";
+import { DomainError } from '../../error/DomainError'
+import { Disc, isOppositeDisc } from './disc'
+import { Move } from './move'
+import { Point } from './point'
 
 export class Board {
   private _walledDiscs: Disc[][]
@@ -13,18 +13,22 @@ export class Board {
   place(move: Move): Board {
     // 空のマス目ではない場合、置くことはできない
     if (this._discs[move.point.y][move.point.x] !== Disc.Empty) {
-      throw new DomainError('SelectedPointIsNotEmpty' ,'Selected point is not empty')
+      throw new DomainError(
+        'SelectedPointIsNotEmpty',
+        'Selected point is not empty'
+      )
     }
-    // ひっくり返す点をリストアップ
+
+    // ひっくり返せる点をリストアップ
     const flipPoints = this.listFlipPoints(move)
 
-    // ひっくり返せる点がない場合、置くことができない
+    // ひっくり返せる点がない場合、置くことはできない
     if (flipPoints.length === 0) {
-      throw new DomainError('FlipPointIsEmpty', 'Flip points is empty')
+      throw new DomainError('FlipPointsIsEmpty', 'Flip points is empty')
     }
 
     // 盤面をコピー
-    const newDiscs = this._discs.map ((line) => {
+    const newDiscs = this._discs.map((line) => {
       return line.map((disc) => {
         return disc
       })
@@ -50,20 +54,20 @@ export class Board {
     const checkFlipPoints = (xMove: number, yMove: number) => {
       const flipCandidate: Point[] = []
 
-      // 一つ動いた位置から削除
+      // 1つ動いた位置から開始
       let cursorX = walledX + xMove
       let cursorY = walledY + yMove
 
-      // 手と逆の石がある間、1つずつ見ていく
+      // 手と逆の色の石がある間、1つずつを見ていく
       while (isOppositeDisc(move.disc, this._walledDiscs[cursorY][cursorX])) {
-        // 番兵を考慮した-1する
-        flipCandidate.push(new Point(cursorX -1, cursorY -1))
+        // 番兵を考慮して-1する
+        flipCandidate.push(new Point(cursorX - 1, cursorY - 1))
         cursorX += xMove
         cursorY += yMove
-        // 次の手が同じ色の石なら、ひっくり返す石が確定
+        // 次が手と同じ色の石なら、ひっくり返す石が確定
         if (move.disc === this._walledDiscs[cursorY][cursorX]) {
           flipPoints.push(...flipCandidate)
-          break;
+          break
         }
       }
     }

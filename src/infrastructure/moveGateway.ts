@@ -23,7 +23,6 @@ export class MoveGateway {
       record['x'],
       record['y']
     )
-
   }
 
   async insert(

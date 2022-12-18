@@ -1,6 +1,6 @@
 type DomainErrorType =
   | 'SelectedPointIsNotEmpty'
-  | 'FlipPointIsEmpty'
+  | 'FlipPointsIsEmpty'
   | 'SelectedDiscIsNotNextDisc'
   | 'SpecifiedTurnNotFound'
 

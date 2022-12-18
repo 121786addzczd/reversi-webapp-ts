@@ -1,12 +1,12 @@
-import { SymbolDisplayPartKind } from "typescript";
-import { DomainError } from "../../error/DomainError";
-import { Board, initialBoard } from "./board";
-import { Disc } from "./disc";
-import { Move } from "./move";
-import { Point } from "./point";
+import { DomainError } from '../../error/DomainError'
+import { Board, initialBoard } from './board'
+import { Disc } from './disc'
+import { Move } from './move'
+import { Point } from './point'
 
 export class Turn {
-  constructor (private _gameId: number,
+  constructor(
+    private _gameId: number,
     private _turnCount: number,
     private _nextDisc: Disc,
     private _move: Move | undefined,
@@ -15,7 +15,7 @@ export class Turn {
   ) {}
 
   placeNext(disc: Disc, point: Point): Turn {
-    // 打とうとした石が、次の石ではない場合、置くことができない
+    // 打とうとした石が、次の石ではない場合、置くことはできない
     if (disc !== this._nextDisc) {
       throw new DomainError(
         'SelectedDiscIsNotNextDisc',
@@ -66,12 +66,5 @@ export class Turn {
 }
 
 export function firstTurn(gameId: number, endAt: Date): Turn {
-  return new Turn(
-    gameId,
-    0,
-    Disc.Dark,
-    undefined,
-    initialBoard,
-    endAt
-  )
+  return new Turn(gameId, 0, Disc.Dark, undefined, initialBoard, endAt)
 }

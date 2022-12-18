@@ -13,7 +13,6 @@ export class GameRepository {
     }
 
     return new Game(gameRecord.id, gameRecord.startedAt)
-
   }
 
   async save(conn: mysql.Connection, game: Game): Promise<Game> {

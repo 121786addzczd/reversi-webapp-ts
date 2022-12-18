@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise'
-import { SquareRecord } from "./squareRecord";
+import { SquareRecord } from './squareRecord'
 
 export class SquareGateway {
   async findForTurnId(
@@ -7,7 +7,7 @@ export class SquareGateway {
     turnId: number
   ): Promise<SquareRecord[]> {
     const squaresSelectResult = await conn.execute<mysql.RowDataPacket[]>(
-      'select id, turn_id, x, y, disc from squares where turn_id = ? ',
+      `select id, turn_id, x, y, disc from squares where turn_id = ?`,
       [turnId]
     )
     const records = squaresSelectResult[0]

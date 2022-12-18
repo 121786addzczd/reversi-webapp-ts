@@ -1,9 +1,9 @@
-import { connectMySQL } from '../infrastructure/connection'
-import { GameGateway } from '../infrastructure/gameGateway'
-import { GameRepository } from '../domain/model/game/gameRepository'
-import { toDisc } from '../domain/model/turn/disc'
-import { Point } from '../domain/model/turn/point'
-import { TurnRepository } from '../domain/model/turn/turnRepository'
+import { GameRepository } from '../../domain/model/game/gameRepository'
+import { toDisc } from '../../domain/model/turn/disc'
+import { Point } from '../../domain/model/turn/point'
+import { TurnRepository } from '../../domain/model/turn/turnRepository'
+import { connectMySQL } from '../../infrastructure/connection'
+import { ApplicationError } from '../error/applicationError'
 
 const turnRepository = new TurnRepository()
 const gameRepository = new GameRepository()
@@ -41,9 +41,11 @@ export class TurnService {
     try {
       const game = await gameRepository.findLatest(conn)
       if (!game) {
-        throw new Error('Latest game not found')
+        throw new ApplicationError(
+          'LatestGameNotFound',
+          'Latest game not found'
+        )
       }
-
       if (!game.id) {
         throw new Error('game.id not exist')
       }
@@ -64,7 +66,6 @@ export class TurnService {
     } finally {
       await conn.end()
     }
-
   }
 
   async registerTurn(turnCount: number, disc: number, x: number, y: number) {
@@ -75,9 +76,11 @@ export class TurnService {
       // 1つ前のターンを取得する
       const game = await gameRepository.findLatest(conn)
       if (!game) {
-        throw new Error('Latest game not found')
+        throw new ApplicationError(
+          'LatestGameNotFound',
+          'Latest game not found'
+        )
       }
-
       if (!game.id) {
         throw new Error('game.id not exist')
       }
@@ -96,8 +99,6 @@ export class TurnService {
       await turnRepository.save(conn, newTurn)
 
       await conn.commit()
-    } catch (e) {
-      console.log(`エラー発生 ${e}`);
     } finally {
       await conn.end()
     }
